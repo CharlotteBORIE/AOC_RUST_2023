@@ -1,5 +1,5 @@
 use criterion::{Criterion, criterion_group, criterion_main};
-use MyVersion::*;
+use MyAOC::*;
 
 fn criterion_benchmark(c: &mut Criterion) {
     c.bench_function("complete AOC", |b| b.iter(|| test_aoc()));
