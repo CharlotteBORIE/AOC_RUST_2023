@@ -54,5 +54,6 @@ fn main() {
     // Day9::exercice::part1();
     // Day9::exercice::part2();
 
-    Day10::exercice::part1();
+    //Day10::exercice::part1();
+    Day10::exercice::part2();
 }
