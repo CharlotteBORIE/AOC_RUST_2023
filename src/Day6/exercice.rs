@@ -26,18 +26,12 @@ pub fn bench2(){
 
 pub fn part1_implementation(input: &str) -> String {
     let mut product = 1;
-    let times: Vec <i32> = input.lines().next().unwrap().strip_prefix("Time:").unwrap().split_whitespace().map(|x| x.parse::<i32>().unwrap()).collect();
-    let distance: Vec <i32> = input.lines().nth(1).unwrap().strip_prefix("Distance:").unwrap().split_whitespace().map(|x| x.parse::<i32>().unwrap()).collect();
+    let times: Vec <u64> = input.lines().next().unwrap().strip_prefix("Time:").unwrap().split_whitespace().map(|x| x.parse::<u64>().unwrap()).collect();
+    let distance: Vec <u64> = input.lines().nth(1).unwrap().strip_prefix("Distance:").unwrap().split_whitespace().map(|x| x.parse::<u64>().unwrap()).collect();
     for index in 0..times.len() {
         let time = times[index];
         let distance = distance[index];
-        let mut count = 0;
-        for time_pressed in 0..time{
-            if time_pressed* (time - time_pressed) > distance {
-                count += 1;
-            }
-        }
-        product *= count;
+        product *= formula(time, distance);
     }
     product.to_string()
 }
@@ -46,14 +40,23 @@ pub fn part2_implementation(input: &str) -> String {
     let mut product = 1;
     let time: u64 = input.lines().next().unwrap().strip_prefix("Time:").unwrap().split_whitespace().collect::<Vec<&str>>().join("").parse::<u64>().unwrap();
     let distance: u64 = input.lines().nth(1).unwrap().strip_prefix("Distance:").unwrap().split_whitespace().collect::<Vec<&str>>().join("").parse::<u64>().unwrap();
-        let mut count = 0;
-        for time_pressed in 0..time{
-            if time_pressed* (time - time_pressed) > distance {
-                count += 1;
-            }
+    formula(time, distance).to_string()
+}
+
+fn formula(time: u64, distance: u64) -> u64 {
+    if 4 * distance < time * time {
+        let delta = (time * time - 4 * distance) as f64;
+        let mut x1 = ((time as f64 - delta.sqrt()) / 2.0);
+        let mut x2 = ((time as f64 + delta.sqrt()) / 2.0);
+        if x1.fract() == 0.0 {
+            x1 += 1.0;
         }
-    product *= count;
-    product.to_string()
+        if x2.fract() == 0.0 {
+            x2 -= 1.0;
+        }
+        return (x2.floor() - x1.ceil() ) as u64 + 1;
+    }
+    panic!("not implemented")
 }
 
 
