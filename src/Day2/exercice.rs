@@ -18,6 +18,15 @@ pub fn bench(){
     part2_implementation(input);
 }
 
+pub fn bench1(){
+    let input = include_str!("Input.txt");
+    part1_implementation(input);
+}
+pub fn bench2(){
+    let input = include_str!("Input.txt");
+    part2_implementation(input);
+}
+
 pub fn part1_implementation(input: &str) -> String {
     let mut sum = 0;
     let red_limit = 12;

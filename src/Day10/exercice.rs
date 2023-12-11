@@ -1,5 +1,4 @@
 use grid::Grid;
-use std::any::TypeId;
 use std::cell::Cell;
 use std::fmt::{Display, Formatter};
 
@@ -18,6 +17,14 @@ pub fn part2() {
 pub fn bench() {
     let input = include_str!("Input.txt");
     part1_implementation(input);
+    part2_implementation(input);
+}
+pub fn bench1(){
+    let input = include_str!("Input.txt");
+    part1_implementation(input);
+}
+pub fn bench2(){
+    let input = include_str!("Input.txt");
     part2_implementation(input);
 }
 pub fn part1_implementation(input: &str) -> String {

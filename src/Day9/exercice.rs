@@ -16,14 +16,20 @@ pub fn bench(){
     part1_implementation(input);
     part2_implementation(input);
 }
+pub fn bench1(){
+    let input = include_str!("Input.txt");
+    part1_implementation(input);
+}
+pub fn bench2(){
+    let input = include_str!("Input.txt");
+    part2_implementation(input);
+}
 pub fn part1_implementation(input: &str) -> String {
     let mut sum = 0;
     for line in input.lines() {
         let number : Vec<i64> = line.split_whitespace().map(|x| x.parse::<i64>().unwrap()).collect();
-        //println!("{:?}", number);
         let next = get_next(&number);
         sum += next;
-        //println!("next: {}", next);
     }
     sum.to_string()
 }

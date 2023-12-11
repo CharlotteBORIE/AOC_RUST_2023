@@ -17,6 +17,14 @@ pub fn bench(){
     part1_implementation(input);
     part2_implementation(input);
 }
+pub fn bench1(){
+    let input = include_str!("Input.txt");
+    part1_implementation(input);
+}
+pub fn bench2(){
+    let input = include_str!("Input.txt");
+    part2_implementation(input);
+}
 
 pub fn part1_implementation(input: &str) -> String {
     let first_line: Vec<&str> = input.lines().next().unwrap().strip_prefix("seeds: ").unwrap().split(" ").collect();

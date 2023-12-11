@@ -15,6 +15,15 @@ pub fn bench(){
     part1_implementation(input);
     part2_implementation(input);
 }
+pub fn bench1(){
+    let input = include_str!("Input.txt");
+    part1_implementation(input);
+}
+pub fn bench2(){
+    let input = include_str!("Input.txt");
+    part2_implementation(input);
+}
+
 
 
 
@@ -22,7 +31,6 @@ pub fn part1_implementation(input: &str) -> String {
     let mut sum = 0;
     for line in input.lines() {
         let numbers = line.chars().filter(|c| c.is_numeric()).collect::<Vec<char>>();
-        println!("{:?}", numbers);
         let mut a_string = String::from("");
         a_string.push(*numbers.first().unwrap());
         a_string.push(*numbers.last().unwrap());

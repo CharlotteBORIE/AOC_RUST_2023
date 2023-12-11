@@ -19,6 +19,15 @@ pub fn bench(){
     part1_implementation(input);
     part2_implementation(input);
 }
+
+pub fn bench1(){
+    let input = include_str!("Input.txt");
+    part1_implementation(input);
+}
+pub fn bench2(){
+    let input = include_str!("Input.txt");
+    part2_implementation(input);
+}
 pub fn part1_implementation(input: &str) -> String {
     let cols = input.lines().next().unwrap().len();
     let mut grid: Grid<char> = Grid::from_vec(input.chars().filter(|&c| c != '\n').collect(), cols);
