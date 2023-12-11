@@ -2,7 +2,7 @@ use criterion::{Criterion, criterion_group, criterion_main};
 use MyAOC::*;
 
 fn criterion_benchmark(c: &mut Criterion) {
-    c.bench_function("complete AOC", |b| b.iter(|| Day8::exercice::bench2()));
+    c.bench_function("complete AOC", |b| b.iter(|| Day11::exercice::bench()));
 }
 
 fn bench(c: &mut Criterion) {
@@ -28,6 +28,8 @@ fn bench(c: &mut Criterion) {
     group.bench_function("Day9 p2", |b| b.iter(|| { Day9::exercice::bench2(); }));
     group.bench_function("Day10 p1", |b| b.iter(|| { Day10::exercice::bench1(); }));
     group.bench_function("Day10 p2", |b| b.iter(|| { Day10::exercice::bench2(); }));
+    group.bench_function("Day11 p1", |b| b.iter(|| { Day11::exercice::bench1(); }));
+    group.bench_function("Day11 p2", |b| b.iter(|| { Day11::exercice::bench2(); }));
 }
 
 criterion_group!(benches, criterion_benchmark);
@@ -45,4 +47,5 @@ fn test_aoc() {
     Day8::exercice::bench();
     Day9::exercice::bench();
     Day10::exercice::bench();
+    Day11::exercice::bench();
 }
