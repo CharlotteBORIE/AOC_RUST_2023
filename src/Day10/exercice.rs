@@ -52,14 +52,56 @@ pub fn part2_implementation(input: &str) -> String {
         cols,
     );
     let grid = get_piped_grid(&grid);
-    let internal_islands = get_internal_island(&grid, &grid);
+    let (first_corner,_pipe) = grid.indexed_iter().find(|(_, &c)| c == Pipe::SouthEast).unwrap();
+    let mut direction = Direction::East;
+    let mut current_position = (first_corner.0, first_corner.1 + 1);// because we know that the first corner is on the left
+    let mut total_count = 0;
+    while current_position != first_corner{
 
-    internal_islands
-        .iter()
-        .filter(|&c| check_is_in_chain(&grid, c.clone()))
-        .map(|c| c.len())
-        .sum::<usize>()
-        .to_string()
+        let &pipe = grid.get(current_position.0, current_position.1).unwrap();
+        if direction == Direction::North && (pipe == Pipe::NorthSouth || pipe == Pipe::SouthWest)
+        || direction == Direction::East &&  pipe == Pipe::NorthWest
+        {
+            // count cell on row
+            let mut column = current_position.1 + 1;
+            let mut count = 0;
+            loop
+            {
+                let &pipe = grid.get(current_position.0,column).unwrap();
+                if pipe != Pipe::Ground {
+                    break;
+                }
+                count += 1;
+                column += 1;
+            }
+            total_count += count;
+
+        }
+        (current_position.0,current_position.1,direction) = get_next(current_position, &pipe, direction);
+
+    }
+
+    total_count.to_string()
+}
+
+fn get_next( position: (usize, usize), pipe: &Pipe, direction: Direction) -> (usize, usize,Direction) {
+    match (pipe,direction) {
+        (Pipe::NorthSouth, Direction::North) => (position.0 - 1, position.1, Direction::North),
+        (Pipe::NorthSouth, Direction::South) => (position.0 + 1, position.1, Direction::South),
+        (Pipe::NorthWest, Direction::South) => (position.0 , position.1 - 1, Direction::West),
+        (Pipe::NorthWest, Direction::East) => (position.0- 1, position.1 , Direction::North),
+        (Pipe::NorthEast, Direction::South) => (position.0, position.1 +1, Direction::East),
+        (Pipe::NorthEast, Direction::West) => (position.0 -1, position.1 , Direction::North),
+        (Pipe::SouthEast, Direction::North) => (position.0 , position.1 + 1, Direction::East),
+        (Pipe::SouthEast, Direction::West) => (position.0 + 1, position.1, Direction::South),
+        (Pipe::SouthWest, Direction::North) => (position.0 , position.1 - 1, Direction::West),
+        (Pipe::SouthWest, Direction::East) => (position.0 + 1, position.1, Direction::South),
+        (Pipe::EastWest, Direction::West) => (position.0, position.1 - 1, Direction::West),
+        (Pipe::EastWest, Direction::East) => (position.0, position.1 + 1, Direction::East),
+
+        _ => panic!("invalid pipe {:?} and direction {:?} ", pipe, direction),
+
+    }
 }
 
 fn get_distance_grid(grid: &Grid<Pipe>) -> Grid<i32> {
@@ -384,6 +426,14 @@ fn check_column_for_trapped_island(grid: &Grid<Pipe>, row: usize,start:usize, en
         return false
     }
     true
+}
+
+#[derive(Debug, PartialEq, Eq, Clone, Copy)]
+enum Direction {
+    North,
+    South,
+    East,
+    West,
 }
 
 #[derive(Debug, PartialEq, Eq, Clone, Copy, Default)]
