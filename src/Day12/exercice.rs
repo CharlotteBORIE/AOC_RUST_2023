@@ -30,18 +30,20 @@ pub fn bench2() {
 pub fn part1_implementation(input: &str) -> String {
     let mut sum = 0;
     for line in input.lines() {
+        println!("{}",line);
         let split = line.split(" ").collect::<Vec<&str>>();
-        let map = split[0];
+        let mut map = split[0].to_string();
+        map.push('.');
+        let map = map.as_str();
 
         let repartition = split[1]
             .split(",")
-            .map(|x| x.parse::<i32>().unwrap())
-            .collect::<Vec<i32>>();
-        let repartition = repartition.iter().rev().cloned().collect::<Vec<i32>>();
+            .map(|x| x.parse::<usize>().unwrap())
+            .collect::<Vec<usize>>();
 
-        let arrangement = get_arrangement(map, &repartition,0);
-        let arrangement : Vec<&Vec<i32>> = arrangement.iter().filter(|(_,x)| x.iter().filter(|&&x| x!=0).map(|&x| x).collect::<Vec<i32>>() == repartition).map(|(_, x)| x).collect();
-        sum += arrangement.iter().count();
+        let arrangement = get_arrangement(map, &repartition,0,0);
+        println!("{}",arrangement);
+        sum += arrangement;
     }
     sum.to_string()
 }
@@ -51,143 +53,42 @@ pub fn part2_implementation(input: &str) -> String {
         println!("{}",line);
         let split = line.split(" ").collect::<Vec<&str>>();
 
-        let new_map = vec![split[0]; 5].join("?");
+        let mut new_map = vec![split[0]; 5].join("?");
+        new_map.push('.');
         let new_repartition = vec![split[1]; 5].join(",");
 
         let map = new_map.as_str();
         let repartition = new_repartition
             .split(",")
-            .map(|x| x.parse::<i32>().unwrap())
-            .collect::<Vec<i32>>();
-        let repartition = repartition.iter().rev().cloned().collect::<Vec<i32>>();
-        let arrangement = get_arrangement(map, &repartition,0);
-        let arrangement : Vec<&Vec<i32>> = arrangement.iter().filter(|(_,x)| x.iter().filter(|&&x| x!=0).map(|&x| x).collect::<Vec<i32>>() == repartition).map(|(_, x)| x).collect();
-        sum += arrangement.iter().count();
+            .map(|x| x.parse::<usize>().unwrap())
+            .collect::<Vec<usize>>();
+        let arrangement = get_arrangement(map, &repartition,0,0);
+         sum += arrangement;
     }
     sum.to_string()
 }
-fn get_arrangement(mapping: &str, repartition: &Vec<i32>, index : usize) -> Vec<(usize,Vec<i32>)> {
+fn get_arrangement(mapping: &str, repartition: &Vec<usize>, index_map : usize, index_rep : usize) -> usize {
 
-    if mapping.len() == 0 || repartition.len() <= index {
-        return vec![];
+    if repartition.len() == index_rep {
+        return !mapping[index_map..].chars().any(|x| x == '#') as usize;
+    }
+    
+    let value = repartition[index_rep];
+    if mapping.len() - index_map < value + 1{
+        //we can't do the repartition
+        return 0;
     }
 
     let mut sum = 0;
-    let mut count = 0;
-    let mut new = true;
-
-    let char = mapping.chars().next().unwrap();
-
-    let next = &mapping[1..];
-    let mut next_possible = get_arrangement(next, &repartition,index);
-     match char {
-        '#' => {
-            next_possible = do_good_pipe( &repartition,  &next_possible);
-        }
-        '.' => {
-            next_possible = do_bad_pipe(&repartition, &next_possible);
-            }
-
-        '?' => {
-            //add Clones
-            let mut next_possible_clone = next_possible.clone();
-            next_possible = do_good_pipe(&repartition, &next_possible);
-            next_possible_clone = do_bad_pipe(&repartition, &next_possible_clone);
-            next_possible.append(&mut next_possible_clone);
-        }
-        _ => panic!("Invalid char")
+    if mapping.chars().nth(index_map).unwrap() != '#' {
+        sum+=get_arrangement(mapping, repartition, index_map + 1, index_rep);
     }
-    next_possible
-}
-
-fn do_bad_pipe(repartition: &Vec<i32>, next_possible: &Vec<(usize, Vec<i32>)>) -> Vec<(usize, Vec<i32>)>{
-    if next_possible.len() == 0 {
-        return vec![(0,vec![0])];
+    if !mapping[index_map..index_map+value].chars().any(|x| x == '.')
+        && mapping.chars().nth(index_map + value).unwrap() != '#'
+    {
+        sum+=get_arrangement(mapping, repartition, index_map + value + 1, index_rep + 1);
     }
-    let mut temp = vec![];
-    for (index,elem) in next_possible.iter() {
-        if *elem.last().unwrap() == 0 {
-            temp.push((*index,elem.clone()));
-        }
-        else if index < &repartition.len() && *elem.last().unwrap() == repartition[*index] {
-            let mut clone = elem.clone();
-            clone.push(0);
-            temp.push((*index+1,clone));
-        }
-
-    }
-    temp
-}
-
-fn do_good_pipe(repartition: &Vec<i32>, next_possible: &Vec<(usize, Vec<i32>)>) ->  Vec<(usize, Vec<i32>)>{
-    if next_possible.len() == 0 {
-        return vec![(0,vec![1])];
-    }
-    let mut temp = vec![];
-    for (index,elem) in next_possible.iter() {
-        let mut clone = elem.clone();
-        if *elem.last().unwrap() == 0 {
-            clone.push( 1);
-            temp.push((*index,clone));
-        } else {
-            if index < &repartition.len() && *elem.last().unwrap() < repartition[*index] {
-                let mut last = clone.last_mut().unwrap();
-                *last += 1;
-                temp.push((*index,clone));
-            }
-        }
-    }
-    temp
-}
-
-fn get_repartition_spring(list: &Vec<i32>) -> Vec<i32> {
-    let mut repartition = vec![];
-    let mut count = 0;
-    for &elem in list.iter() {
-        if elem == 0 {
-            if count != 0 {
-                repartition.push(count);
-                count = 0;
-            }
-        } else {
-            count += 1;
-        }
-    }
-    if count != 0 {
-        repartition.push(count);
-    }
-    repartition
-}
-
-fn get_spring(chain: &str) -> Vec<Vec<i32>> {
-    match chain.chars().next() {
-        Some(char) => {
-            let next = &chain[1..];
-            let mut next_possible = get_spring(next);
-            if char == '#' {
-                for elem in next_possible.iter_mut() {
-                    elem.insert(0, 1);
-                }
-            }
-
-            if char == '?' {
-                //add Clones
-                let mut next_possible_clone = next_possible.clone();
-
-                for elem in next_possible_clone.iter_mut() {
-                    elem.insert(0, 0);
-                }
-
-                for elem in next_possible.iter_mut() {
-                    elem.insert(0, 1);
-                }
-
-                next_possible.append(&mut next_possible_clone);
-            }
-            next_possible
-        }
-        None => vec![vec![]],
-    }
+    sum
 }
 
 #[cfg(test)]
