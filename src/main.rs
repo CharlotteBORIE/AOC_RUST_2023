@@ -57,6 +57,9 @@ fn main() {
     //Day10::exercice::part1();
     //Day10::exercice::part2();
 
-    //Day11::exercice::part1();
-    Day11::exercice::part2();
+    // Day11::exercice::part1();
+    // Day11::exercice::part2();
+
+    //Day12::exercice::part1();
+    Day12::exercice::part2();
 }
