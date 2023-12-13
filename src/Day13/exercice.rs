@@ -166,14 +166,146 @@ fn display_grid(p0: &Grid<char>) {
 }
 
 pub fn part2_implementation(input: &str) -> String {
-    let mut product = 0;
+    let mut sum = 0;
+    let mut cols = 0;
+    let mut vector: Vec<char> = Vec::new();
     for line in input.lines() {
-        let number = line.parse::<i32>().unwrap();
-        product *= number;
+        if line.is_empty() {
+            let mut grid: Grid<char> = Grid::from_vec(vector.clone(), cols);
+            display_grid(&grid);
+            sum += find_symmetry_with_smudge(&grid);
+            vector.clear();
+            continue;
+        }
+        cols = line.chars().count();
+        vector.append(&mut line.chars().collect());
+
+
     }
-    product.to_string()
+
+    // do last
+    let mut grid: Grid<char> = Grid::from_vec(vector.clone(), cols);
+    display_grid(&grid);
+    sum += find_symmetry_with_smudge(&grid);
+
+
+    sum.to_string()
 }
 
+fn find_symmetry_with_smudge(grid: &Grid<char>) -> usize {
+    // try column
+
+    // find first row symetries
+    let row = 0;
+    let mut col = 0;
+    let mut symmetries :Vec<(usize,bool)> = Vec::new();
+    while col < grid.cols() -1 {
+        let (sym,smudge) = check_symmetry_column_with_smudge(grid, row, col,false);
+        if sym {
+            symmetries.push((col,smudge));
+        }
+        col += 1;
+    }
+
+    // check rest of the rows
+    let mut possible_symmetries = Vec::new();
+    for &(col,smudge) in symmetries.iter(){
+        let mut sym = true;
+        let mut smudge = smudge;
+        for row in 1..grid.rows(){
+            (sym,smudge) = check_symmetry_column_with_smudge(grid, row, col,smudge);
+            if !sym {
+                break;
+            }
+        }
+        if sym && smudge{
+            possible_symmetries.push(col);
+        }
+    }
+    if possible_symmetries.len() > 1 {
+        panic!("Multiple symmetries found")
+    }
+    if possible_symmetries.len() == 1 {
+        return possible_symmetries[0] + 1;
+    }
+
+    // try row
+    let mut row = 0;
+    let col = 0;
+    let mut symmetries = Vec::new();
+    while row < grid.rows() - 1 {
+        let (sym,smudge) = check_symmetry_row_with_smudge(grid, row, col,false);
+        if sym {
+            symmetries.push((row,smudge));
+        }
+        row += 1;
+    }
+
+
+    // check rest of the rows
+    let mut possible_symmetries = Vec::new();
+    for &(row,smudge) in symmetries.iter(){
+        let mut sym=true;
+        let mut smudge = smudge;
+        for col in 1..grid.cols(){
+            (sym,smudge) = check_symmetry_row_with_smudge(grid, row, col,smudge);
+            if !sym {
+                break;
+            }
+        }
+        if sym && smudge{
+            possible_symmetries.push(row);
+        }
+    }
+    if possible_symmetries.len() > 1 {
+        panic!("Multiple symmetries found")
+    }
+    if possible_symmetries.len() == 0 {
+        panic!("No symmetries found")
+    }
+
+    (possible_symmetries[0]+1) * 100
+}
+
+fn check_symmetry_column_with_smudge(grid: &Grid<char>, row: usize, col: usize,smudge :bool) -> (bool,bool) {
+    let mut sym = true;
+    let mut smudge = smudge;
+    for offset in 0..col+1 {
+        if col + offset + 1 >= grid.cols() {
+            break;
+        }
+        if grid[(row, col + offset+1)] != grid[(row, col - offset)] {
+            if smudge {
+                sym = false;
+                break;
+            }
+            else {
+                smudge = true;
+            }
+        }
+    }
+    (sym,smudge)
+}
+
+fn check_symmetry_row_with_smudge(grid: &Grid<char>, row: usize, col: usize,smudge :bool) -> (bool,bool) {
+    let mut sym = true;
+    let mut smudge = smudge;
+    for offset in 0..row+1 {
+        if row + offset + 1 >= grid.rows() {
+            break;
+        }
+        if grid[(row + offset + 1, col)] != grid[(row - offset, col )] {
+            if smudge {
+                sym = false;
+                break;
+            }
+            else {
+                smudge = true;
+            }
+        }
+    }
+    (sym,smudge)
+}
 
 #[cfg(test)]
 mod tests {
@@ -188,6 +320,6 @@ mod tests {
     #[test]
     fn test_part_2() {
         let input = include_str!("Example.txt");
-        assert_eq!(part2_implementation(input), 0.to_string());
+        assert_eq!(part2_implementation(input), 400.to_string());
     }
 }
