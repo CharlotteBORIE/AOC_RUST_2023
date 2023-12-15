@@ -32,7 +32,6 @@ pub fn part1_implementation(input: &str) -> String {
     for line in input.lines() {
         if line.is_empty() {
             let mut grid: Grid<char> = Grid::from_vec(vector.clone(), cols);
-            display_grid(&grid);
             sum += find_symmetry(&grid);
             vector.clear();
             continue;
@@ -45,7 +44,6 @@ pub fn part1_implementation(input: &str) -> String {
 
     // do last
     let mut grid: Grid<char> = Grid::from_vec(vector.clone(), cols);
-    display_grid(&grid);
     sum += find_symmetry(&grid);
 
 
@@ -100,8 +98,6 @@ fn find_symmetry(grid: &Grid<char>) -> usize {
         row += 1;
     }
 
-    println!("First Symmetry found {:?}", symmetries);
-
     // check rest of the rows
     let mut possible_symmetries = Vec::new();
     for &row in symmetries.iter(){
@@ -122,7 +118,6 @@ fn find_symmetry(grid: &Grid<char>) -> usize {
     if possible_symmetries.len() == 0 {
         panic!("No symmetries found")
     }
-    println!("Symmetry found {:?}", possible_symmetries);
 
     (possible_symmetries[0]+1) * 100
 }
@@ -172,7 +167,6 @@ pub fn part2_implementation(input: &str) -> String {
     for line in input.lines() {
         if line.is_empty() {
             let mut grid: Grid<char> = Grid::from_vec(vector.clone(), cols);
-            display_grid(&grid);
             sum += find_symmetry_with_smudge(&grid);
             vector.clear();
             continue;
@@ -185,7 +179,6 @@ pub fn part2_implementation(input: &str) -> String {
 
     // do last
     let mut grid: Grid<char> = Grid::from_vec(vector.clone(), cols);
-    display_grid(&grid);
     sum += find_symmetry_with_smudge(&grid);
 
 

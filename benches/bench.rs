@@ -2,7 +2,7 @@ use criterion::{Criterion, criterion_group, criterion_main};
 use MyAOC::*;
 
 fn criterion_benchmark(c: &mut Criterion) {
-    c.bench_function("complete AOC", |b| b.iter(|| Day11::exercice::bench()));
+    c.bench_function("complete AOC", |b| b.iter(|| Day14::exercice::bench()));
 }
 
 fn bench(c: &mut Criterion) {
@@ -30,9 +30,15 @@ fn bench(c: &mut Criterion) {
     group.bench_function("Day10 p2", |b| b.iter(|| { Day10::exercice::bench2(); }));
     group.bench_function("Day11 p1", |b| b.iter(|| { Day11::exercice::bench1(); }));
     group.bench_function("Day11 p2", |b| b.iter(|| { Day11::exercice::bench2(); }));
+    group.bench_function("Day12 p1", |b| b.iter(|| { Day12::exercice::bench1(); }));
+    //group.bench_function("Day12 p2", |b| b.iter(|| { Day12::exercice::bench2(); }));
+    group.bench_function("Day13 p1", |b| b.iter(|| { Day13::exercice::bench1(); }));
+    group.bench_function("Day13 p2", |b| b.iter(|| { Day13::exercice::bench2(); }));
+    group.bench_function("Day14 p1", |b| b.iter(|| { Day14::exercice::bench1(); }));
+    group.bench_function("Day14 p2", |b| b.iter(|| { Day14::exercice::bench2(); }));
 }
 
-criterion_group!(benches, criterion_benchmark);
+criterion_group!(benches, bench);
 criterion_main!(benches);
 
 #[inline]

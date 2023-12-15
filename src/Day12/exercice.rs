@@ -30,7 +30,6 @@ pub fn bench2() {
 pub fn part1_implementation(input: &str) -> String {
     let mut sum = 0;
     for line in input.lines() {
-        println!("{}",line);
         let split = line.split(" ").collect::<Vec<&str>>();
         let mut map = split[0].to_string();
         map.push('.');
@@ -42,7 +41,6 @@ pub fn part1_implementation(input: &str) -> String {
             .collect::<Vec<usize>>();
 
         let arrangement = get_arrangement(map, &repartition,0,0);
-        println!("{}",arrangement);
         sum += arrangement;
     }
     sum.to_string()
@@ -50,7 +48,6 @@ pub fn part1_implementation(input: &str) -> String {
 pub fn part2_implementation(input: &str) -> String {
     let mut sum = 0;
     for line in input.lines() {
-        println!("{}",line);
         let split = line.split(" ").collect::<Vec<&str>>();
 
         let mut new_map = vec![split[0]; 5].join("?");
