@@ -26,11 +26,23 @@ pub fn bench2(){
 
 pub fn part1_implementation(input: &str) -> String {
     let mut sum = 0;
-    for line in input.lines() {
-        let number = line.parse::<i32>().unwrap();
+    let lines = input.split(",").collect::<Vec<&str>>();
+    for line in lines {
+        let mut number = 0;
+        for char in line.chars() {
+            number = update_number(number, char);
+        }
+
         sum += number;
     }
     sum.to_string()
+}
+
+fn update_number(number: i32, char: char) -> i32 {
+    let mut new_number = number + char as i32;
+    new_number *= 17;
+    new_number %= 256;
+    new_number
 }
 
 pub fn part2_implementation(input: &str) -> String {
@@ -50,7 +62,7 @@ mod tests {
     #[test]
     fn test_part_1() {
         let input = include_str!("Example.txt");
-        assert_eq!(part1_implementation(input), 1.to_string());
+        assert_eq!(part1_implementation(input), 1320.to_string());
     }
 
     #[test]
