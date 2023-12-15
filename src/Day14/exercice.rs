@@ -32,7 +32,7 @@ pub fn bench2(){
 pub fn part1_implementation(input: &str) -> String {
     let cols = input.lines().next().unwrap().len();
     let mut grid: Grid<char> = Grid::from_vec(input.chars().filter(|&c| c != '\n').collect(), cols);
-    grid = tilt_grid_north(&grid);
+    tilt_grid_north(&mut grid);
     let mut sum = 0;
     for column in grid.iter_cols() {
         let number = north_pressure(column);
@@ -73,13 +73,7 @@ fn spin_grid(grid: &Grid<char>, number_of_cycles: usize) -> Grid<char> {
     let mut list_of_grid = vec![grid.clone()];
     let mut new_grid = grid.clone();
     for index in 0..number_of_cycles {
-        let mut sum = 0;
-        for column in list_of_grid[index].iter_cols() {
-            let number = north_pressure(column);
-            sum += number;
-        }
-
-        new_grid = spin_grid_once(&new_grid);
+        spin_grid_once(&mut new_grid);
         if list_of_grid.contains(&new_grid) {
             //we found a loop
             let loop_start = list_of_grid.iter().position(|x| *x == new_grid).unwrap();
@@ -93,74 +87,60 @@ fn spin_grid(grid: &Grid<char>, number_of_cycles: usize) -> Grid<char> {
     new_grid
 }
 
-fn spin_grid_once(grid: &Grid<char>) -> Grid<char> {
-    let mut grid = grid.clone();
+fn spin_grid_once(grid: &mut Grid<char>) {
     //north
-    grid = tilt_grid_north(&grid);
+    tilt_grid_north(grid);
 
     //west
-    grid =tilt_grid_west(&grid);
+    tilt_grid_west(grid);
 
     //south
-    grid = tilt_grid_south(&mut grid);
+    tilt_grid_south(grid);
 
     //east
-    tilt_grid_east(&mut grid)
+    tilt_grid_east(grid)
 }
 
-fn tilt_grid_east(grid: &Grid<char>) -> Grid<char> {
-    let mut temp_grid: Grid<char> = Grid::new(0, 0);
-
-    for (index, row) in grid.iter_rows().enumerate() {
-        let mut new_row = tilt_west(row.rev().collect::<Vec<&char>>());
-        new_row.reverse();
-        temp_grid.push_row(new_row);
-    }
-    temp_grid
-}
-
-fn tilt_grid_south(grid:&Grid<char>)  -> Grid<char> {
-    let mut temp_grid: Grid<char> = Grid::new(0, 0);
-
-    for (index, col) in grid.iter_cols().enumerate() {
-        let mut new_col = tilt_north(col.rev().collect::<Vec<&char>>());
-        new_col.reverse();
-        temp_grid.push_col(new_col);
-    }
-    temp_grid
-}
-
-fn tilt_grid_west(grid:&Grid<char>)  -> Grid<char> {
-    let mut temp_grid: Grid<char> = Grid::new(0, 0);
-    for (index, row) in grid.iter_rows().enumerate() {
-        temp_grid.push_row(tilt_west(row.collect::<Vec<&char>>()));
-    }
-    temp_grid
-}
-
-fn tilt_grid_north(grid:&Grid<char>)  -> Grid<char>{
-    let mut temp_grid: Grid<char> = Grid::new(0, 0);
-    for (index, col) in grid.iter_cols().enumerate() {
-        temp_grid.push_col(tilt_north(col.collect::<Vec<&char>>()));
-    }
-    temp_grid
-}
-
-fn display_grid(grid:&Grid<char>) {
-    for row in grid.iter_rows() {
-        for &cell in row {
-            print!("{}", cell);
+fn tilt_grid_east(grid: &mut Grid<char>) {
+    for (row_index, row) in grid.clone().iter_rows().enumerate() {
+        for (column,value) in tilt_west(row.rev().collect::<Vec<&char>>()).iter().rev().enumerate() {
+            let cell = grid.get_mut(row_index,column).unwrap();
+            *cell = *value;
         }
-        println!();
     }
-    println!();
 }
 
+fn tilt_grid_south(grid:&mut Grid<char>) {
+
+    for (col_index, col) in grid.clone().iter_cols().enumerate() {
+        for (row,value) in tilt_north(col.rev().collect::<Vec<&char>>()).iter().rev().enumerate() {
+            let cell = grid.get_mut(row,col_index).unwrap();
+            *cell = *value;
+        }
+    }
+}
+
+fn tilt_grid_west(grid:&mut Grid<char>) {
+    for (row_index, row) in grid.clone().iter_rows().enumerate() {
+        for (column,value) in tilt_west(row.collect::<Vec<&char>>()).iter().enumerate() {
+            let cell = grid.get_mut(row_index,column).unwrap();
+            *cell = *value;
+        }
+    }
+}
+
+fn tilt_grid_north(grid:&mut Grid<char>)  {
+    for (col_index, col) in grid.clone().iter_cols().enumerate() {
+        for (row,value) in tilt_north(col.collect::<Vec<&char>>()).iter().enumerate() {
+            let cell = grid.get_mut(row,col_index).unwrap();
+            *cell = *value;
+        }
+    }
+}
 fn tilt_north( column: Vec<&char>) -> Vec<char>{
     let mut new_column :Vec<char>= vec!['.';column.len()];
     let mut count = 0;
     let mut block_index = 0;
-    let mut current_index = 0;
     for (current_index,&row) in column.iter().enumerate(){
         match row {
             '.' => {},
@@ -174,7 +154,6 @@ fn tilt_north( column: Vec<&char>) -> Vec<char>{
                 count = 0 ;
             }
             'O' => {
-                new_column[current_index] = '.';
                 count+= 1;
             }
             _ => panic!("Invalid char"),
@@ -193,7 +172,6 @@ fn tilt_west( row: Vec<&char>) -> Vec<char>{
     let mut new_row :Vec<char>= vec!['.';row.len()];
     let mut count = 0;
     let mut block_index = 0;
-    let mut current_index = 0;
     for (current_index,&column) in row.iter().enumerate(){
         match column {
             '.' => {},
@@ -207,7 +185,6 @@ fn tilt_west( row: Vec<&char>) -> Vec<char>{
                 count = 0 ;
             }
             'O' => {
-                new_row[current_index] = '.';
                 count+= 1;
             }
             _ => panic!("Invalid char"),
@@ -222,7 +199,15 @@ fn tilt_west( row: Vec<&char>) -> Vec<char>{
     new_row
 }
 
-
+fn display_grid(grid:&Grid<char>) {
+    for row in grid.iter_rows() {
+        for &cell in row {
+            print!("{}", cell);
+        }
+        println!();
+    }
+    println!();
+}
 #[cfg(test)]
 mod tests {
     use super::*;

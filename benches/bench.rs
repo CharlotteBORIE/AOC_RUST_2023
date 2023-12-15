@@ -2,7 +2,7 @@ use criterion::{Criterion, criterion_group, criterion_main};
 use MyAOC::*;
 
 fn criterion_benchmark(c: &mut Criterion) {
-    c.bench_function("complete AOC", |b| b.iter(|| Day14::exercice::bench()));
+    c.bench_function("complete AOC", |b| b.iter(|| Day14::exercice::bench2()));
 }
 
 fn bench(c: &mut Criterion) {
@@ -40,7 +40,7 @@ fn bench(c: &mut Criterion) {
     group.bench_function("Day15 p2", |b| b.iter(|| { Day15::exercice::bench2(); }));
 }
 
-criterion_group!(benches, bench);
+criterion_group!(benches, criterion_benchmark);
 criterion_main!(benches);
 
 #[inline]
