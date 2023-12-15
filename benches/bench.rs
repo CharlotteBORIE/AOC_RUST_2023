@@ -36,6 +36,8 @@ fn bench(c: &mut Criterion) {
     group.bench_function("Day13 p2", |b| b.iter(|| { Day13::exercice::bench2(); }));
     group.bench_function("Day14 p1", |b| b.iter(|| { Day14::exercice::bench1(); }));
     group.bench_function("Day14 p2", |b| b.iter(|| { Day14::exercice::bench2(); }));
+    group.bench_function("Day15 p1", |b| b.iter(|| { Day15::exercice::bench1(); }));
+    group.bench_function("Day15 p2", |b| b.iter(|| { Day15::exercice::bench2(); }));
 }
 
 criterion_group!(benches, bench);
@@ -54,4 +56,8 @@ fn test_aoc() {
     Day9::exercice::bench();
     Day10::exercice::bench();
     Day11::exercice::bench();
+    Day12::exercice::bench();
+    Day13::exercice::bench();
+    Day14::exercice::bench();
+    Day15::exercice::bench();
 }
