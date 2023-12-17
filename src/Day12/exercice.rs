@@ -1,3 +1,4 @@
+use std::collections::HashMap;
 use std::iter::Rev;
 use std::slice::Iter;
 
@@ -64,28 +65,68 @@ pub fn part2_implementation(input: &str) -> String {
     }
     sum.to_string()
 }
+
 fn get_arrangement(mapping: &str, repartition: &Vec<usize>, index_map : usize, index_rep : usize) -> usize {
+    let mut arrangement:HashMap<(usize,usize),usize> = HashMap::new();
+    set_cell(&mut arrangement,0,0,1);
+    for (index,char) in mapping.chars().enumerate() {
+        let mut new_arrangement = HashMap::new();
+        let possible_chars = match char
+        {
+            '.' => vec!['.'],
+            '#' => vec!['#'],
+            '?' => vec!['.', '#'],
+            _ => panic!("Unknown char")
+        };
+        for &(so_far,index) in arrangement.keys(){
+            let value = arrangement[&(so_far,index)];
+            for possible_char in possible_chars.iter(){
+                if index == repartition.len(){
+                    //we are at the end of the repartition
+                    if possible_char == &'.'{
+                        add_cell(&mut new_arrangement,so_far,index,value);
+                    }
+                }
+                else{
+                    if so_far == repartition[index]{
+                        //we can't do the repartition
+                        if possible_char == &'.'{
+                            add_cell(&mut new_arrangement,0,index+1,value);
+                        }
+                    }
+                    else{
+                        if possible_char == &'.' && so_far ==0{
+                            add_cell(&mut new_arrangement,so_far,index,value);
+                        }
+                        if possible_char == &'#'{
+                            add_cell(&mut new_arrangement,so_far +1,index,value);
+                        }
+                    }
+                }
+            }
+        }
+        arrangement = new_arrangement;
+    }
 
-    if repartition.len() == index_rep {
-        return !mapping[index_map..].chars().any(|x| x == '#') as usize;
-    }
-    
-    let value = repartition[index_rep];
-    if mapping.len() - index_map < value + 1{
-        //we can't do the repartition
-        return 0;
-    }
+    let first = arrangement.get(&(0,repartition.len()));
+    let last = arrangement.get(&(*repartition.last().unwrap(),repartition.len()));
 
-    let mut sum = 0;
-    if mapping.chars().nth(index_map).unwrap() != '#' {
-        sum+=get_arrangement(mapping, repartition, index_map + 1, index_rep);
+    match (first,last){
+        (Some(&x),Some(&y)) => x+y,
+        (Some(&x),None) => x,
+        (None,Some(&y)) => y,
+        (None,None) => 0
     }
-    if !mapping[index_map..index_map+value].chars().any(|x| x == '.')
-        && mapping.chars().nth(index_map + value).unwrap() != '#'
-    {
-        sum+=get_arrangement(mapping, repartition, index_map + value + 1, index_rep + 1);
-    }
-    sum
+}
+
+fn add_cell(hash_map: &mut HashMap<(usize, usize), usize>, key1: usize, key2: usize, value: usize) {
+    let cell = hash_map.entry((key1, key2)).or_insert(0);
+    *cell += value;
+}
+
+fn set_cell(hash_map: &mut HashMap<(usize, usize), usize>, key1: usize, key2: usize, value: usize) {
+    let cell = hash_map.entry((key1, key2)).or_insert(0);
+    *cell = value;
 }
 
 #[cfg(test)]

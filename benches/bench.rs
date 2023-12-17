@@ -31,7 +31,7 @@ fn bench(c: &mut Criterion) {
     group.bench_function("Day11 p1", |b| b.iter(|| { Day11::exercice::bench1(); }));
     group.bench_function("Day11 p2", |b| b.iter(|| { Day11::exercice::bench2(); }));
     group.bench_function("Day12 p1", |b| b.iter(|| { Day12::exercice::bench1(); }));
-    //group.bench_function("Day12 p2", |b| b.iter(|| { Day12::exercice::bench2(); }));
+    group.bench_function("Day12 p2", |b| b.iter(|| { Day12::exercice::bench2(); }));
     group.bench_function("Day13 p1", |b| b.iter(|| { Day13::exercice::bench1(); }));
     group.bench_function("Day13 p2", |b| b.iter(|| { Day13::exercice::bench2(); }));
     group.bench_function("Day14 p1", |b| b.iter(|| { Day14::exercice::bench1(); }));
@@ -40,7 +40,7 @@ fn bench(c: &mut Criterion) {
     group.bench_function("Day15 p2", |b| b.iter(|| { Day15::exercice::bench2(); }));
 }
 
-criterion_group!(benches, criterion_benchmark);
+criterion_group!(benches, bench);
 criterion_main!(benches);
 
 #[inline]
