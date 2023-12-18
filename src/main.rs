@@ -76,4 +76,8 @@ fn main() {
 
     //Day17::exercice::part1();
     //Day17::exercice::part2();
+
+    Day18::exercice::part1();
+    // too high 35251
+    // too low 34828
 }
