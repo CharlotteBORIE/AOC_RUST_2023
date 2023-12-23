@@ -1,4 +1,5 @@
 use grid::Grid;
+use rayon::prelude::*;
 
 pub fn part1() {
     let input = include_str!("Input.txt");
@@ -225,12 +226,202 @@ fn set_dug(p0: &mut Grid<bool>, p1: (usize, usize)) {
 }
 
 pub fn part2_implementation(input: &str) -> String {
-    let mut product = 0;
+    let mut sum = 0;
+
+    // get the number of rows and columns
+    let mut columns: Vec<(i64,(i64,i64),Adjacent,Adjacent)> = Vec::new();
+    let mut rows = Vec::new();
+    let mut current_col:i64 = 0;
+    let mut current_row:i64 = 0;
+
+    let mut previous_direction = Adjacent::Up;
+    let last_direction = Adjacent::Right;
+
+
+    //let mut rows_min_max_by_column : Vec<(i64,(i64,i64))> = Vec::new();
+    let mut cols_min_max_by_row : Vec<(i64,(i64,i64))> = Vec::new();
+
     for line in input.lines() {
-        let number = line.parse::<i32>().unwrap();
-        product *= number;
+        let split = line.split_whitespace().collect::<Vec<&str>>();
+        let hexa = split[2];
+        let direction = hexa.chars().nth(7).unwrap();
+        // let direction = split[0].chars().map(|c| match c {
+        //     'R' => '0',
+        //     'D' => '1',
+        //     'L' => '2',
+        //     'U' => '3',
+        //     _ => panic!("Unknown direction"),
+        // }).collect::<String>().chars().nth(0).unwrap();
+        //let value = i64::from_str_radix(split[1], 16).unwrap();
+        let value = i64::from_str_radix(&hexa[2..7], 16).unwrap();
+        match direction {
+            '0' => {
+                //right
+                rows.push((current_row, (current_col,current_col+value),previous_direction,last_direction));
+                if let Some(range) = cols_min_max_by_row.iter_mut()
+                        .find(|(other_row,_range)| *other_row == current_row)
+                        .map(|(_,ran)| ran) {
+                    if range.0 > current_col {
+                        range.0 = current_col;
+                    }
+                    if range.1 < current_col+value {
+                        range.1 = current_col+value;
+                    }
+                }
+                else {
+                    cols_min_max_by_row.push((current_row,(current_col,current_col+value)));
+                }
+                current_col += &value;
+                previous_direction = Adjacent::Right;
+                if let Some(prev) = columns.iter_mut().last() {
+                    prev.3 = Adjacent::Right;
+                }
+            }
+            '1' => {
+                //down
+                columns.push((current_col, (current_row,current_row+value),previous_direction,last_direction));
+
+                for elem in current_row+1..current_row+value {
+                if let Some(range) = cols_min_max_by_row.iter_mut()
+                    .find(|(other_row,_range)| *other_row == elem)
+                    .map(|(_,ran)| ran) {
+                    if range.0 > current_col {
+                        range.0 = current_col;
+                    }
+                    if range.1 < current_col {
+                        range.1 = current_col;
+                    }
+                }
+                else {
+                    cols_min_max_by_row.push((elem,(current_col,current_col)));
+                }
+                }
+                current_row += &value;
+                previous_direction = Adjacent::Down;
+                if let Some(prev) = rows.iter_mut().last() {
+                    prev.3 = Adjacent::Down;
+                }
+            }
+            '2' => {
+
+                //Left
+                rows.push((current_row, (current_col-value,current_col),previous_direction,last_direction));
+                if let Some(range) = cols_min_max_by_row.iter_mut().find(|(other_row,_range)| *other_row == current_row).map(|(_,ran)| ran){
+                    if range.0 > current_col-value {
+                        range.0 = current_col-value;
+                    }
+                    if range.1 < current_col {
+                        range.1 = current_col;
+                    }
+                }
+                else {
+                    cols_min_max_by_row.push((current_row,(current_col-value,current_col)));
+                }
+                current_col -= &value;
+                previous_direction = Adjacent::Left;
+                if let Some(prev) = columns.iter_mut().last() {
+                    prev.3 = Adjacent::Left;
+                }
+
+            }
+            '3' => {
+                //up
+                columns.push((current_col, (current_row-value,current_row),previous_direction,last_direction));
+
+                for elem in current_row-value+1..current_row {
+                    if let Some(range) = cols_min_max_by_row.iter_mut()
+                        .find(|(other_row,_range)| *other_row == elem)
+                        .map(|(_,ran)| ran) {
+                        if range.0 > current_col {
+                            range.0 = current_col;
+                        }
+                        if range.1 < current_col {
+                            range.1 = current_col;
+                        }
+                    }
+                    else {
+                        cols_min_max_by_row.push((elem,(current_col,current_col)));
+                    }
+                }
+                current_row -= &value;
+                previous_direction = Adjacent::Up;
+                if let Some(prev) = rows.iter_mut().last() {
+                    prev.3 = Adjacent::Up;
+                }
+            }
+            direction => panic!("Unknown direction {}", direction),
+        }
     }
-    product.to_string()
+    rows.first_mut().unwrap().2 = previous_direction;
+
+    let mut sum = 0;
+    cols_min_max_by_row.sort_by(|(row1,_),(row2,_)| row1.cmp(row2));
+
+    let sum : i64 = cols_min_max_by_row.into_par_iter().map(|(row,(col_min,col_max))|
+        (col_min..=col_max).into_par_iter().map(|col| {
+            if columns.iter().any(|(other_col,range,_,_)| {
+                let range1 = *range;
+                other_col == &col && (row >= range1.0 && row <= range1.1)
+            })  ||
+                rows.iter().any(|(other_row,range,_,_)| {
+                    let range1 = *range;
+                    other_row == &row && (col >= range1.0 && col <= range1.1)
+                }){
+                return 1;
+            }
+            let mut count = 0;
+            //check row right
+            let mut count_cols = columns.iter().filter(|(other_col,range,previous,next)| {
+                let range1 = *range;
+                other_col < &col && (row >= range1.0 && row <= range1.1)
+            }).count();
+            count_cols += rows.iter().filter(|(other_row,range,previous,next)| {
+                other_row == &row && col > range.1  && (previous == next)
+            }).count();
+            if count_cols % 2 == 0 {
+                return 0;
+            }
+            //check row left
+            let mut count_cols = columns.iter().filter(|(other_col,range,previous,next)| {
+                let range1 = *range;
+                other_col > &col && (row >= range1.0 && row <= range1.1)
+            }).count();
+            count_cols += rows.iter().filter(|(other_row,range,previous,next)| {
+                other_row == &row && col < range.0 && (previous == next)
+            }).count();
+            if count_cols % 2 == 0 {
+                return 0;
+            }
+
+            //check col down
+            let mut count_rows = rows.iter().filter(|(other_row,range,previous,next)| {
+                let range1 = *range;
+                other_row < &row && (col >= range1.0 && col <= range1.1)
+            }).count();
+            count_rows += columns.iter().filter(|(other_col,range,previous,next)| {
+                other_col == &col && row > range.1 && (previous == next)
+            }).count();
+            if count_rows % 2 == 0 {
+                return 0;
+            }
+            //check col up
+            let mut count_rows = rows.iter().filter(|(other_row,range,previous,next)| {
+                let range1 = *range;
+                other_row > &row && (col >= range1.0 && col <= range1.1)
+            }).count();
+            count_rows += columns.iter().filter(|(other_col,range,previous,next)| {
+                let range1 = *range;
+                other_col == &col && row < range.0 && (previous == next)
+            }).count();
+            if count_rows % 2 == 0 {
+                return 0;
+            }
+            return 1;
+
+        }
+        ).sum::<i64>()
+    ).sum();
+    sum.to_string()
 }
 
 #[cfg(test)]
@@ -246,6 +437,6 @@ mod tests {
     #[test]
     fn test_part_2() {
         let input = include_str!("Example.txt");
-        assert_eq!(part2_implementation(input), 0.to_string());
+        assert_eq!(part2_implementation(input), 952408144115i64.to_string());
     }
 }
